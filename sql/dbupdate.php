@@ -246,7 +246,7 @@ if (!$ilDB->tableExists($table_name)) {
 <#6>
 <?php
 
-$table_name = 'crevento_log_users';
+$table_name = 'crevlite_log_users';
 if (!$ilDB->tableExists($table_name)) {
     $fields = array(
         'evento_id' => array(
@@ -279,7 +279,7 @@ if (!$ilDB->tableExists($table_name)) {
     $ilDB->addPrimaryKey($table_name, array("evento_id"));
 }
 
-$table_name = 'crevento_log_members';
+$table_name = 'crevlite_log_members';
 if (!$ilDB->tableExists($table_name)) {
     $fields = array(
         'evento_event_id' => array(
@@ -312,7 +312,7 @@ if (!$ilDB->tableExists($table_name)) {
     $ilDB->addPrimaryKey($table_name, array('evento_event_id', 'evento_user_id'));
 }
 
-$table_name = 'crevento_log_events';
+$table_name = 'crevlite_log_events';
 if (!$ilDB->tableExists($table_name)) {
     $fields = array(
         'evento_id' => array(

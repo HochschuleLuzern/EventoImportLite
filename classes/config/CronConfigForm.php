@@ -116,9 +116,12 @@ class CronConfigForm
 
     public function __construct(ilSetting $settings, \ilEventoImportLitePlugin $plugin, RBACServices $rbac)
     {
+        global $DIC;
+
         $this->settings = $settings;
         $this->cp = $plugin;
         $this->rbac = $rbac;
+        $this->lng = $DIC->language();
     }
 
     public function fillFormWithApiConfig(ilPropertyFormGUI $form)
@@ -222,19 +225,15 @@ class CronConfigForm
             self::FORM_USER_AUTH_MODE
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_USER_AUTH_MODE_DESC));
-        $auth_modes = ilAuthUtils::_getAllAuthModes();
+        $auth_modes = \ilAuthUtils::_getActiveAuthModes();
         $options = [];
-        foreach ($auth_modes as $auth_mode => $auth_name) {
-            if (ilLDAPServer::isAuthModeLDAP($auth_mode)) {
-                $server = ilLDAPServer::getInstanceByServerId(ilLDAPServer::getServerIdByAuthMode($auth_mode));
-                if ($server->isActive()) {
-                    $options[$auth_name] = $auth_name;
-                }
+        foreach ($auth_modes as $auth_name => $auth_key) {
+            if ($auth_name == 'default') {
+                $name = $this->lng->txt('auth_' . $auth_name) . " (" . $this->lng->txt('auth_' . \ilAuthUtils::_getAuthModeName($auth_key)) . ")";
             } else {
-                if ($this->settings->get($auth_name . '_active') || $auth_mode == AUTH_LOCAL) {
-                    $options[$auth_name] = $auth_name;
-                }
+                $name = \ilAuthUtils::getAuthModeTranslation($auth_key, $auth_name);
             }
+            $options[$auth_name] = $name;
         }
         $ws_item->setOptions($options);
         $ws_item->setValue($this->settings->get(self::CONF_USER_AUTH_MODE));

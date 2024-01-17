@@ -58,7 +58,7 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
         $this->tabs->activateTab(self::TAB_MAIN);
     }
 
-    public function performCommand($cmd)
+    public function performCommand($cmd) :void
     {
         $this->addPageTabs();
 

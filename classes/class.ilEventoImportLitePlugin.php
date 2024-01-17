@@ -35,7 +35,7 @@ class ilEventoImportLitePlugin extends ilCronHookPlugin
 {
     const PLUGIN_NAME = "EventoImportLite";
     
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return self::PLUGIN_NAME;
     }
@@ -58,7 +58,7 @@ class ilEventoImportLitePlugin extends ilCronHookPlugin
     /**
      * @return  ilCronJob or false on failure
      */
-    public function getCronJobInstance($a_job_id)
+    public function getCronJobInstance($a_job_id): \ilCronJob
     {
         $this->loadCronJobInstance();
         if (isset(self::$cron_job_instances[$a_job_id])) {
@@ -97,7 +97,7 @@ class ilEventoImportLitePlugin extends ilCronHookPlugin
         }
     }
 
-    protected function beforeUninstall()
+    protected function beforeUninstall(): bool
     {
         global $DIC;
         $db = $DIC->database();

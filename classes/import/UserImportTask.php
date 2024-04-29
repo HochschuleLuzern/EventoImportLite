@@ -56,7 +56,7 @@ class UserImportTask
             } catch (\ilEventoImportLiteCommunicationException $e) {
                 throw $e;
             } catch (\Exception $e) {
-                $this->evento_logger->logException('User Import', $e->getMessage());
+                $this->evento_logger->logException('User Import', $e->getMessage(), $e->getTraceAsString());
             }
         } while ($this->evento_importer->hasMoreData());
     }
@@ -77,9 +77,9 @@ class UserImportTask
                 } else {
                     $evento_id_msg = "Evento ID not given";
                 }
-                $this->evento_logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage());
+                $this->evento_logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage(), $e->getTraceAsString());
             } catch (\Exception $e) {
-                $this->evento_logger->logException('User Import', $e->getMessage());
+                $this->evento_logger->logException('User Import', $e->getMessage(), $e->getTraceAsString());
             }
         }
     }

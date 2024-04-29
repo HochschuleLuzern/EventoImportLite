@@ -14,7 +14,7 @@ class DefaultEventSettings
 
     public function __construct(\ilSetting $settings)
     {
-        $this->default_object_owner_id = (int) $settings->get(CronConfigForm::CONF_EVENT_OWNER_ID, 6);
+        $this->default_object_owner_id = (int) $settings->get(CronConfigForm::CONF_EVENT_OWNER_ID, "6");
         $this->default_sort_mode = \ilContainer::SORT_MANUAL;
         $this->default_sort_new_items_order = \ilContainer::SORT_NEW_ITEMS_ORDER_CREATION;
         $this->default_sort_new_items_position = \ilContainer::SORT_NEW_ITEMS_POSITION_BOTTOM;

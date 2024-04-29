@@ -71,11 +71,10 @@ class EventAndMembershipImportTask
                 $action->executeAction();
             } catch (\ilEventoImportLiteApiDataException $e) {
                 $data = $e->getApiData();
+                $evento_id_msg = "Evento ID not given";
                 if (isset($data[EventoEvent::JSON_ID])) {
                     $id = $data[EventoEvent::JSON_ID];
                     $evento_id_msg = "Evento ID: $id";
-                } else {
-                    $evento_id_msg = "Evento ID not given";
                 }
 
                 $this->logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage());

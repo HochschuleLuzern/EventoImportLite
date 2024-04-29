@@ -107,7 +107,7 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
 
                     $output = $api_tester_gui->getApiDataAsString($cmd);
 
-                    if (strlen($output) > 0) {
+                    if ($output !== '') {
                         ilUtil::sendSuccess($output, true);
                     }
                 } catch (Exception $e) {

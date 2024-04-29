@@ -185,15 +185,6 @@ class UserManager
         // Set user time limits
         $ilias_user->setTimeLimitUnlimited(true);
 
-        /*
-            The old import had the $user->setPasswd method two times called. One time within an if-statement and another time without
-            Code snipped of if-statement below:
-                if ($user_settings->isAuthModeLDAP()) {
-                    $user->setPasswd('');
-                }
-
-            Since the second call without an if-statement makes this block useless, it is not in the code anymore
-        */
         $ilias_user->setPasswd('');
 
         // profil is always public for registered users

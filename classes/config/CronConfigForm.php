@@ -432,7 +432,10 @@ class CronConfigForm
                 $mapped_role_input = (int) $form->getInput(self::FORM_USER_EVENTO_ROLE_MAPPED_TO_ . $role_id);
                 if (!is_null($mapped_role_input) && !in_array($mapped_role_input, $role_mapping)) {
                     $role_mapping[$role_id] = $mapped_role_input;
-                } elseif (in_array($mapped_role_input, $role_mapping)) {
+                    continue;
+                }
+
+                if (in_array($mapped_role_input, $role_mapping)) {
                     $form_input_correct = false;
                     $save_global_role_mapping = false;
                 }

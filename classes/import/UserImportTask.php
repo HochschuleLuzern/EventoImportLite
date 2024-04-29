@@ -71,11 +71,10 @@ class UserImportTask
                 $action->executeAction();
             } catch (\ilEventoImportLiteApiDataException $e) {
                 $data = $e->getApiData();
+                $evento_id_msg = "Evento ID not given";
                 if (isset($data[EventoUser::JSON_ID])) {
                     $id = $data[EventoUser::JSON_ID];
                     $evento_id_msg = "Evento ID: $id";
-                } else {
-                    $evento_id_msg = "Evento ID not given";
                 }
                 $this->evento_logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage(), $e->getTraceAsString());
             } catch (\Exception $e) {

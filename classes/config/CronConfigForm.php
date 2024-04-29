@@ -279,7 +279,7 @@ class CronConfigForm
 
             if (isset($role_mapping[$role_id])) {
                 $ws_item->setChecked(true);
-                $mapping_input->setValue($role_mapping[$role_id]);
+                $mapping_input->setValue((string) $role_mapping[$role_id]);
             } else {
                 $ws_item->setChecked(false);
             }
@@ -472,7 +472,7 @@ class CronConfigForm
         switch ($input_object_owner) {
             case self::FORM_EVENT_OPT_OWNER_ROOT:
                 $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_ROOT);
-                $this->settings->set(self::CONF_EVENT_OWNER_ID, 6);
+                $this->settings->set(self::CONF_EVENT_OWNER_ID, "6");
                 break;
 
             case self::FORM_EVENT_OPT_OWNER_CUSTOM_USER:

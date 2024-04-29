@@ -24,28 +24,28 @@
 <?php
 $table_name = \EventoImportLite\db\IliasEventoUserTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImportLite\db\IliasEventoUserTblDef::COL_EVENTO_ID => array(
+    $fields = [
+        \EventoImportLite\db\IliasEventoUserTblDef::COL_EVENTO_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoUserTblDef::COL_ILIAS_USER_ID => array(
+        ],
+        \EventoImportLite\db\IliasEventoUserTblDef::COL_ILIAS_USER_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => array(
+        ],
+        \EventoImportLite\db\IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => [
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoUserTblDef::COL_ACCOUNT_TYPE => array(
+        ],
+        \EventoImportLite\db\IliasEventoUserTblDef::COL_ACCOUNT_TYPE => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 15,
             'notnull' => true
-        ),
+        ],
 
-    );
+    ];
 
     $ilDB->createTable($table_name, $fields);
     $ilDB->addPrimaryKey($table_name, [\EventoImportLite\db\IliasEventoUserTblDef::COL_EVENTO_ID]);
@@ -58,80 +58,80 @@ if (!$ilDB->tableExists($table_name)) {
 
 $table_name = \EventoImportLite\db\IliasEventoEventsTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_ID => array(
+    $fields = [
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_TITLE => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_TITLE => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 255,
             'notnull' => true,
             'fixed' => false
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 128,
             'notnull' => true,
             'fixed' => false
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_TYPE => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_TYPE => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 25,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 1,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_START_DATE => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_START_DATE => [
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_END_DATE => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_END_DATE => [
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => false
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED => [
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_ILIAS_TYPE => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_ILIAS_TYPE => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 4,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_REF_ID => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_REF_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_OBJ_ID => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_OBJ_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 100,
             'notnull' => false
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_ID));
+    $ilDB->addPrimaryKey($table_name, [\EventoImportLite\db\IliasEventoEventsTblDef::COL_EVENTO_ID]);
 }
 
 ?>
@@ -140,33 +140,33 @@ if (!$ilDB->tableExists($table_name)) {
 
 $table_name = \EventoImportLite\db\IliasEventLocationsTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImportLite\db\IliasEventLocationsTblDef::COL_DEPARTMENT_NAME => array(
+    $fields = [
+        \EventoImportLite\db\IliasEventLocationsTblDef::COL_DEPARTMENT_NAME => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 30,
             'notnull' => true,
             'fixed' => false
-        ),
-        \EventoImportLite\db\IliasEventLocationsTblDef::COL_EVENT_KIND => array(
+        ],
+        \EventoImportLite\db\IliasEventLocationsTblDef::COL_EVENT_KIND => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 30,
             'notnull' => true,
             'fixed' => false
-        ),
-        \EventoImportLite\db\IliasEventLocationsTblDef::COL_YEAR => array(
+        ],
+        \EventoImportLite\db\IliasEventLocationsTblDef::COL_YEAR => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 2,
             'notnull' => true,
-        ),
-        \EventoImportLite\db\IliasEventLocationsTblDef::COL_REF_ID => array(
+        ],
+        \EventoImportLite\db\IliasEventLocationsTblDef::COL_REF_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImportLite\db\IliasEventLocationsTblDef::COL_DEPARTMENT_NAME, \EventoImportLite\db\IliasEventLocationsTblDef::COL_EVENT_KIND, \EventoImportLite\db\IliasEventLocationsTblDef::COL_YEAR));
+    $ilDB->addPrimaryKey($table_name, [\EventoImportLite\db\IliasEventLocationsTblDef::COL_DEPARTMENT_NAME, \EventoImportLite\db\IliasEventLocationsTblDef::COL_EVENT_KIND, \EventoImportLite\db\IliasEventLocationsTblDef::COL_YEAR]);
 }
 
 ?>
@@ -175,27 +175,27 @@ if (!$ilDB->tableExists($table_name)) {
 
 $table_name = \EventoImportLite\db\IliasEventoEventMembershipsTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID => array(
+    $fields = [
+        \EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_ROLE_TYPE => array(
+        ],
+        \EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_ROLE_TYPE => [
             'type' => 'integer',
             'length' => 1,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID,
-                                            \EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID));
+    $ilDB->addPrimaryKey($table_name, [\EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID,
+                                            \EventoImportLite\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID]);
 }
 
 
@@ -205,7 +205,7 @@ if (!$ilDB->tableExists($table_name)) {
 
 $table_name = \EventoImportLite\db\IliasParentEventTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
+    $fields = [
         \EventoImportLite\db\IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY => array(
             'type' => ilDBConstants::T_TEXT,
             'length' => 100,
@@ -236,7 +236,7 @@ if (!$ilDB->tableExists($table_name)) {
             'length' => 8,
             'notnull' => true
         )
-    );
+    ];
 
     $ilDB->createTable($table_name, $fields);
     $ilDB->addPrimaryKey($table_name, array(\EventoImportLite\db\IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY));

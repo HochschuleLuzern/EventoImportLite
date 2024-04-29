@@ -136,8 +136,8 @@ class MembershipManager
     {
         $participants_obj = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
 
-        $admin_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_ADMIN : IL_GRP_ADMIN;
-        $member_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_MEMBER : IL_GRP_MEMBER;
+        $admin_role_code = $ilias_event->getIliasType() == 'crs' ? \ilParticipants::IL_CRS_ADMIN : \ilParticipants::IL_GRP_ADMIN;
+        $member_role_code = $ilias_event->getIliasType() == 'crs' ? \ilParticipants::IL_CRS_MEMBER : \ilParticipants::IL_GRP_MEMBER;
 
         $this->addUsersToMembershipableObject($participants_obj, $imported_event, $admin_role_code, $member_role_code, $ilias_event->getRefId());
 
@@ -170,7 +170,13 @@ class MembershipManager
     {
         // Add users to main event
         $participants_obj_of_event = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
-        $this->addUsersToMembershipableObject($participants_obj_of_event, $imported_event, IL_GRP_ADMIN, IL_GRP_MEMBER, $ilias_event->getRefId());
+        $this->addUsersToMembershipableObject(
+            $participants_obj_of_event,
+            $imported_event,
+            \ilParticipants::IL_GRP_ADMIN,
+            \ilParticipants::IL_GRP_MEMBER,
+            $ilias_event->getRefId()
+        );
 
         // Add users to all parent membershipable objects
         foreach ($parent_events as $parent_event) {
@@ -180,16 +186,16 @@ class MembershipManager
                 $this->addUsersToMembershipableObject(
                     $participants_obj_of_parent,
                     $imported_event,
-                    IL_CRS_ADMIN,
-                    IL_CRS_MEMBER,
+                    \ilParticipants::IL_CRS_ADMIN,
+                    \ilParticipants::IL_CRS_MEMBER,
                     $parent_event
                 );
             } elseif ($participants_obj_of_parent instanceof \ilGroupParticipants) {
                 $this->addUsersToMembershipableObject(
                     $participants_obj_of_parent,
                     $imported_event,
-                    IL_GRP_ADMIN,
-                    IL_GRP_MEMBER,
+                    \ilParticipants::IL_GRP_ADMIN,
+                    \ilParticipants::IL_GRP_MEMBER,
                     $parent_event
                 );
             }
@@ -281,7 +287,7 @@ class MembershipManager
         $this->addAdminListToObject(
             $event_participant_obj,
             $event_admin_list->getAccountList(),
-            $ilias_evento_event->getIliasType() == 'crs' ? IL_CRS_ADMIN : IL_GRP_ADMIN
+            $ilias_evento_event->getIliasType() == 'crs' ? \ilParticipants::IL_CRS_ADMIN : \ilParticipants::IL_GRP_ADMIN
         );
 
         $parent_membershipables = $this->tree_seeker->getRefIdsOfParentMembershipables($ilias_evento_event->getRefId());
@@ -292,13 +298,13 @@ class MembershipManager
                 $this->addAdminListToObject(
                     $participants_obj,
                     $event_admin_list->getAccountList(),
-                    IL_CRS_ADMIN,
+                    \ilParticipants::IL_CRS_ADMIN,
                 );
             } elseif ($participants_obj instanceof \ilGroupParticipants) {
                 $this->addAdminListToObject(
                     $participants_obj,
                     $event_admin_list->getAccountList(),
-                    IL_GRP_ADMIN,
+                    \ilParticipants::IL_GRP_ADMIN,
                 );
             }
         }

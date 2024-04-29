@@ -90,6 +90,7 @@ class MembershipManager
                 if (!$participants_object->isAssigned($employee_user_id)) {
                     $participants_object->add($employee_user_id, $admin_role_code);
                     $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
+                    \ilForumNotification::checkForumsExistsInsert($membershipable_ref_id, $employee_user_id);
                 } else {
                     $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
                 }
@@ -105,6 +106,7 @@ class MembershipManager
                 if (!$participants_object->isAssigned($student_user_id)) {
                     $participants_object->add($student_user_id, $student_role_code);
                     $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
+                    \ilForumNotification::checkForumsExistsInsert($membershipable_ref_id, $student_user_id);
                 } else {
                     $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
                 }

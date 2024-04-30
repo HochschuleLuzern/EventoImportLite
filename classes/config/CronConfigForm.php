@@ -43,8 +43,6 @@ class CronConfigForm
     const LANG_HEADER_USER_SETTINGS = 'user_import_settings';
     const LANG_USER_AUTH_MODE = 'user_auth_mode';
     const LANG_USER_AUTH_MODE_DESC = 'user_auth_mode_desc';
-    const LANG_DEFAULT_USER_ROLE = 'default_user_role';
-    const LANG_DEFAULT_USER_ROLE_DESC = 'default_user_role_desc';
     const LANG_HEADER_USER_ADDITIONAL_ROLE_MAPPING = 'additional_user_roles_mapping';
     const LANG_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL = 'delete_from_admins_on_removal';
     const LANG_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_DESC = 'delete_from_admins_on_removal_desc';
@@ -77,7 +75,6 @@ class CronConfigForm
     const FORM_API_TIMEOUT_FAILED_REQUEST = 'crevlite_api_timeout_failed_request';
     const FORM_API_MAX_RETRIES = 'crevlite_api_max_retries';
     const FORM_USER_AUTH_MODE = 'crevlite_user_auth_mode';
-    const FORM_DEFAULT_USER_ROLE = 'crevlite_default_user_role';
     const FORM_USER_GLOBAL_ROLE_ = 'crevlite_global_role_';
     const FORM_USER_EVENTO_ROLE_MAPPED_TO_ = 'crevlite_map_from_';
     const FORM_USER_EVENTO_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_ = 'crevlite_delete_admin_on_removal_from_';
@@ -238,16 +235,6 @@ class CronConfigForm
         }
         $ws_item->setOptions($options);
         $ws_item->setValue($this->default_user_settings->getAuthMode());
-        $form->addItem($ws_item);
-
-        $ws_item = new ilNumberInputGUI(
-            $this->cp->txt(self::LANG_DEFAULT_USER_ROLE),
-            self::FORM_DEFAULT_USER_ROLE
-        );
-        $ws_item->setInfo($this->cp->txt(self::LANG_DEFAULT_USER_ROLE_DESC));
-        $ws_item->setRequired(true);
-        $ws_item->allowDecimals(false);
-        $ws_item->setValue((string) $this->default_user_settings->getDefaultUserRoleId());
         $form->addItem($ws_item);
 
         $section = new ilFormSectionHeaderGUI();
@@ -453,10 +440,6 @@ class CronConfigForm
     public function saveUserConfigFromForm(ilPropertyFormGUI $form) : bool
     {
         $this->default_user_settings->setAuthMode($form->getInput(self::FORM_USER_AUTH_MODE));
-        $this->default_user_settings->setDefaultUserRoleId(
-            intval($form->getInput(self::FORM_DEFAULT_USER_ROLE))
-        );
-
         $this->default_user_settings->saveCurrentConfigurationToSettings();
 
         $global_roles = $this->rbac->review()->getGlobalRoles();

@@ -6,8 +6,9 @@ class EventoUserShort extends ApiDataModelBase
 {
     const JSON_ID = 'idAccount';
     const JSON_EDU_ID = 'eduId';
-    private ?int $evento_id;
-    private ?string $edu_id;
+
+    private ?int $evento_id = null;
+    private ?string $edu_id = null;
 
     public function __construct(array $data_set)
     {
@@ -25,7 +26,7 @@ class EventoUserShort extends ApiDataModelBase
 
     public function getEduId() : string
     {
-        return $this->edu_id;
+        return $this->edu_id ?? '';
     }
 
     public function getDecodedApiData() : array

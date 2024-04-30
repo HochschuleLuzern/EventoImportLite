@@ -48,6 +48,8 @@ class CronConfigForm
     const LANG_HEADER_USER_ADDITIONAL_ROLE_MAPPING = 'additional_user_roles_mapping';
     const LANG_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL = 'delete_from_admins_on_removal';
     const LANG_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_DESC = 'delete_from_admins_on_removal_desc';
+    const LANG_ROLE_TRACK_REMOVAL_CUSTOM_FIELD = 'track_removal_custom_field';
+    const LANG_ROLE_TRACK_REMOVAL_CUSTOM_FIELD_DESC = 'track_removal_custom_field_desc';
     const LANG_ROLE_MAPPING_TO = 'maps_to';
     const LANG_ROLE_MAPPING_TO_DESC = 'maps_to_desc';
     const LANG_HEADER_USER_FOLLOW_UP_ROLE_MAPPING = 'follow_up_role_mapping';
@@ -79,6 +81,7 @@ class CronConfigForm
     const FORM_USER_GLOBAL_ROLE_ = 'crevlite_global_role_';
     const FORM_USER_EVENTO_ROLE_MAPPED_TO_ = 'crevlite_map_from_';
     const FORM_USER_EVENTO_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_ = 'crevlite_delete_admin_on_removal_from_';
+    const FORM_USER_EVENTO_ROLE_TRACK_REMOVAL_CUSTOM_FIELD_FOR_ = 'crevlite_track_removal_custom_field_for_';
     const FORM_USER_FOLLOW_UP_ROLE_FOR_ = 'crevlite_follow_up_role_for_';
     const FORM_DEPARTEMTNS = 'crevlite_departments';
     const FORM_KINDS = 'crevlite_kinds';
@@ -253,7 +256,17 @@ class CronConfigForm
 
         $global_roles = $this->rbac->review()->getGlobalRoles();
         $role_mapping = array_flip($this->default_user_settings->getEventoCodeToIliasRoleMapping());
+        $track_removal_custom_fields_mapping = $this->default_user_settings->getTrackRemovalCustomFieldsMapping();
         $delete_from_admin_when_removed_role_array = $this->default_user_settings->getDeleteFromAdminWhenRemovedFromRoleMapping();
+
+        $custom_fields = \ilUserDefinedFields::_getInstance();
+        $available_custom_fields = [0 => '--'];
+        foreach ($custom_fields->getDefinitions() as $definition) {
+            if ($definition['field_type'] === (string) UDF_TYPE_TEXT) {
+                $available_custom_fields[$definition['field_id']] = $definition['field_name'];
+            }
+        }
+
 
         foreach ($global_roles as $role_id) {
             $role_title = \ilObject::_lookupTitle($role_id);
@@ -272,6 +285,15 @@ class CronConfigForm
             $mapping_desc = sprintf($this->cp->txt(self::LANG_ROLE_MAPPING_TO_DESC), $role_title);
             $mapping_input->setInfo($mapping_desc);
 
+            $track_role_removal_custom_field = new \ilSelectInputGUI(
+                $this->cp->txt(self::LANG_ROLE_TRACK_REMOVAL_CUSTOM_FIELD),
+                self::FORM_USER_EVENTO_ROLE_TRACK_REMOVAL_CUSTOM_FIELD_FOR_ . $role_id
+            );
+            $track_role_removal_custom_field->setOptions($available_custom_fields);
+            $track_role_removal_custom_field->setInfo($this->cp->txt(self::LANG_ROLE_TRACK_REMOVAL_CUSTOM_FIELD_DESC));
+            $track_role_removal_custom_field->setValue($track_removal_custom_fields_mapping[$role_id] ?? 0);
+
+
             $delete_from_admin_input = new \ilCheckboxInputGUI(
                 $this->cp->txt(self::LANG_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL),
                 self::FORM_USER_EVENTO_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_ . $role_id
@@ -287,6 +309,7 @@ class CronConfigForm
             }
 
             $ws_item->addSubItem($mapping_input);
+            $ws_item->addSubItem($track_role_removal_custom_field);
             $ws_item->addSubItem($delete_from_admin_input);
 
 
@@ -448,6 +471,7 @@ class CronConfigForm
             }
 
             $mapped_role_input = $form->getInput(self::FORM_USER_EVENTO_ROLE_MAPPED_TO_ . $role_id);
+            $track_removal_custom_field = $form->getInput(self::FORM_USER_EVENTO_ROLE_TRACK_REMOVAL_CUSTOM_FIELD_FOR_ . $role_id);
             $delete_from_admin_on_removal = $form->getInput(self::FORM_USER_EVENTO_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_ . $role_id);
 
             if (in_array($mapped_role_input, $role_mapping)) {
@@ -458,6 +482,8 @@ class CronConfigForm
 
             $follow_up_role_mapping[$role_id] = intval($form->getInput(self::FORM_USER_FOLLOW_UP_ROLE_FOR_ . $role_id) ?? '0');
 
+            $track_removal_custom_field_mapping[$role_id] = $track_removal_custom_field;
+
             if ($delete_from_admin_on_removal === '1') {
                 $delete_admin_on_removal_from_role[] = $role_id;
             }
@@ -465,6 +491,7 @@ class CronConfigForm
 
         $this->default_user_settings->setEventoCodeToIliasRoleMapping($role_mapping);
         $this->default_user_settings->setDeleteFromAdminWhenRemovedFromRoleMapping($delete_admin_on_removal_from_role);
+        $this->default_user_settings->setTrackRemovalCustomFieldsMapping($track_removal_custom_field_mapping);
         $this->default_user_settings->setFollowUpRoleMapping($follow_up_role_mapping);
         $this->default_user_settings->saveCurrentConfigurationToSettings();
 

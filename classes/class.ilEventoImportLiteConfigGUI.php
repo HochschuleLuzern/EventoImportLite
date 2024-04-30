@@ -7,6 +7,7 @@ use ILIAS\DI\UIServices;
 use EventoImportLite\administration\EventoImportLiteApiTester;
 use EventoImportLite\administration\AdminScriptPageGUI;
 use EventoImportLite\config\locations\EventLocationsRepository;
+use EventoImport\config\locations\BaseLocationConfiguration;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -33,7 +34,7 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
     {
         global $DIC;
 
-        $this->settings = new ilSetting("crevento");
+        $this->settings = new ilSetting("crevlite");
         $this->tree = $DIC->repositoryTree();
         $this->tpl = $DIC->ui()->mainTemplate();
         $this->ctrl = $DIC->ctrl();
@@ -118,7 +119,7 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
                 break;
 
             case 'reload_repo_locations':
-                $json_settings = $this->settings->get('crevento_location_settings');
+                $json_settings = $this->settings->get(BaseLocationConfiguration::CONF_LOCATIONS);
                 $locations_settings = json_decode($json_settings, true);
 
                 $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);
@@ -129,7 +130,7 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
                 break;
 
             case 'show_missing_repo_locations':
-                $json_settings = $this->settings->get('crevento_location_settings');
+                $json_settings = $this->settings->get(BaseLocationConfiguration::CONF_LOCATIONS);
                 $locations_settings = json_decode($json_settings, true);
 
                 $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);
@@ -165,7 +166,7 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
                 break;
 
             case 'create_repo_locations':
-                $json_settings = $this->settings->get('crevento_location_settings');
+                $json_settings = $this->settings->get(BaseLocationConfiguration::CONF_LOCATIONS);
                 $locations_settings = json_decode($json_settings, true);
 
                 $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);

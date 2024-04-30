@@ -4,6 +4,6 @@ namespace EventoImportLite\import\action\user;
 
 use EventoImportLite\import\action\EventoImportLiteAction;
 
-interface UserDeleteAction extends EventoImportLiteAction
+interface UserConnectionRemoveAction extends EventoImportLiteAction
 {
 }

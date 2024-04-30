@@ -4,6 +4,11 @@ use EventoImportLite\import\Logger;
 use EventoImportLite\import\ImportTaskFactory;
 use EventoImportLite\config\ConfigurationManager;
 use EventoImportLite\config\CronConfigForm;
+use EventoImportLite\config\DefaultUserSettings;
+use EventoImportLite\config\DefaultEventSettings;
+use EventoImportLite\config\ImporterApiSettings;
+use EventoImportLite\config\locations\BaseLocationConfiguration;
+use EventoImportLite\config\locations\RepositoryLocationSeeker;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -33,8 +38,16 @@ use EventoImportLite\config\CronConfigForm;
 
 class ilEventoImportLitePlugin extends ilCronHookPlugin
 {
+    const ID = 'crevlite';
     const PLUGIN_NAME = "EventoImportLite";
-    
+
+    public function __construct(
+        \ilDBInterface $db,
+        \ilComponentRepositoryWrite $component_repository
+    ) {
+        parent::__construct($db, $component_repository, self::ID);
+    }
+
     public function getPluginName(): string
     {
         return self::PLUGIN_NAME;
@@ -61,32 +74,39 @@ class ilEventoImportLitePlugin extends ilCronHookPlugin
     public function getCronJobInstance($a_job_id): \ilCronJob
     {
         $this->loadCronJobInstance();
-        if (isset(self::$cron_job_instances[$a_job_id])) {
-            return self::$cron_job_instances[$a_job_id];
-        } else {
-            return false;
-        }
+        return self::$cron_job_instances[$a_job_id];
     }
-    
+
     protected function loadCronJobInstance()
     {
+        /** @var ILIAS\DI\Container $DIC */
         global $DIC;
-        $db = $DIC->database();
+        $lng = $DIC['lng'];
         $rbac = $DIC->rbac();
-        $tree = $DIC->repositoryTree();
+        $tree = $DIC['tree'];
+        $settings = new ilSetting('crevlite');
 
         //This is a workaround to avoid problems with missing templates
         if (!method_exists($DIC, 'ui') || !method_exists($DIC->ui(), 'factory') || !isset($DIC['ui.factory'])) {
             ilInitialisation::initUIFramework($DIC);
             ilStyleDefinition::setCurrentStyle('Desktop');
         }
-        
+
         if (!isset(self::$cron_job_instances)) {
-            $settings = new ilSetting('crevento');
-            $cron_config = new CronConfigForm($settings, $this, $rbac);
-            $config_manager = new ConfigurationManager($cron_config, $settings, $db, $tree);
-            $import_factory = new ImportTaskFactory($config_manager, $db, $tree, $rbac);
-            $logger = new Logger($db);
+            ;
+            $cron_config = new CronConfigForm(
+                new DefaultUserSettings($settings),
+                new DefaultEventSettings($settings),
+                new ImporterApiSettings($settings),
+                new BaseLocationConfiguration($settings),
+                new RepositoryLocationSeeker($tree, 1),
+                $this,
+                $lng,
+                $rbac
+            );
+            $config_manager = new ConfigurationManager($cron_config, $settings, $this->db, $tree);
+            $import_factory = new ImportTaskFactory($config_manager, $this->db, $tree, $rbac);
+            $logger = new Logger($this->db);
 
             self::$cron_job_instances[ilEventoImportLiteDailyImportCronJob::ID] = new ilEventoImportLiteDailyImportCronJob(
                 $this,
@@ -99,9 +119,6 @@ class ilEventoImportLitePlugin extends ilCronHookPlugin
 
     protected function beforeUninstall(): bool
     {
-        global $DIC;
-        $db = $DIC->database();
-        
         $drop_table_list = [
             \EventoImportLite\db\IliasEventoUserTblDef::TABLE_NAME,
             \EventoImportLite\db\IliasEventoEventsTblDef::TABLE_NAME,
@@ -113,9 +130,10 @@ class ilEventoImportLitePlugin extends ilCronHookPlugin
             Logger::TABLE_LOG_MEMBERSHIPS
         ];
 
-        foreach ($drop_table_list as $key => $table) {
-            if ($db->tableExists($table)) {
-                $db->dropTable($table);
+
+        foreach ($drop_table_list as $table) {
+            if ($this->db->tableExists($table)) {
+                $this->db->dropTable($table);
             }
         }
 

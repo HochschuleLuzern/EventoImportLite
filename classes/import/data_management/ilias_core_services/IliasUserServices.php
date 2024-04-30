@@ -15,20 +15,22 @@ use EventoImportLite\config\DefaultUserSettings;
  */
 class IliasUserServices
 {
-    private DefaultUserSettings $user_settings;
+    private DefaultUserSettings $default_user_settings;
     private \ilDBInterface $db;
-    private RBACServices $rbac_services;
     private \ilRbacReview $rbac_review;
     private \ilRbacAdmin $rbac_admin;
     private ?int $student_role_id;
 
-    public function __construct(DefaultUserSettings $user_settings, \ilDBInterface $db, RBACServices $rbac_services)
-    {
-        $this->user_settings = $user_settings;
+    public function __construct(
+        DefaultUserSettings $default_user_settings,
+        \ilDBInterface $db,
+        \ilRbacReview $rbac_review,
+        \ilRbacAdmin $rbac_admin
+    ) {
+        $this->default_user_settings = $default_user_settings;
         $this->db = $db;
-        $this->rbac_services = $rbac_services;
-        $this->rbac_review = $rbac_services->review();
-        $this->rbac_admin = $rbac_services->admin();
+        $this->rbac_review = $rbac_review;
+        $this->rbac_admin = $rbac_admin;
 
         $this->student_role_id = null;
     }
@@ -82,12 +84,23 @@ class IliasUserServices
         return $ids;
     }
 
-    public function getUserIdByLogin(string $login_name)
+    public function getUserIdByExternalAccount(string $external_account): int
+    {
+        $login_name = \ilObjUser::_checkExternalAuthAccount($this->default_user_settings->getAuthMode(), $external_account);
+
+        if ($login_name === null) {
+            return 0;
+        }
+
+        return \ilObjUser::getUserIdByLogin($login_name);
+    }
+
+    public function getUserIdByLogin(string $login_name): int
     {
         return \ilObjUser::getUserIdByLogin($login_name);
     }
 
-    public function getLoginByUserId(int $user_id)
+    public function getLoginByUserId(int $user_id): ?string
     {
         return \ilObjUser::_lookupLogin($user_id);
     }
@@ -129,21 +142,31 @@ class IliasUserServices
         return $user_id;
     }
 
-    public function searchEduUserByEmail(string $mail_address) : ?\ilObjUser
+    public function getGlobalRolesOfUser(int $user_id): array
     {
-        $user_ids = $this->getUserIdsByEmailAddress($mail_address);
-
-        $found_user_obj = null;
-        foreach ($user_ids as $user_id) {
-            $user_obj = $this->getExistingIliasUserObjectById($user_id);
-            if (stristr($user_obj->getExternalAccount(), '@eduid.ch') !== false) {
-                $found_user_obj = $this->getExistingIliasUserObjectById($user_id);
-            }
-        }
-
-        return $found_user_obj;
+        return $this->rbac_review->assignedGlobalRoles($user_id);
     }
 
+    public function getCrsAdminButNotOwnerRolesOfUser(int $user_id): array
+    {
+        $roles = $this->rbac_review->assignedRoles($user_id);
+        $admin_roles = [];
+        foreach ($roles as $role_id) {
+            $title = \ilObject::_lookupTitle($role_id);
+            $object_id = $this->rbac_review->getObjectOfRole($role_id);
+
+            if (substr($title, 0, 12) === 'il_crs_admin'
+                && \ilObject::_lookupOwner($object_id) !== $user_id) {
+                $admin_roles[] = $role_id;
+            }
+        }
+        return $admin_roles;
+    }
+
+    public function isUserAssignedToRole(int $user_id, int $role_id): bool
+    {
+        return $this->rbac_review->isAssigned($user_id, $role_id);
+    }
     /*
      * User and role specific methods
      */
@@ -166,13 +189,13 @@ class IliasUserServices
     {
         // TODO: Implement config for this
         if (is_null($this->student_role_id)) {
-            $this->student_role_id = $this->user_settings->getStudentRoleId();
+            $this->student_role_id = $this->default_user_settings->getStudentRoleId();
             if (is_null($this->student_role_id)) {
                 return false;
             }
         }
 
-        return $this->rbac_services->review()->isAssigned($ilias_user_object->getId(), $this->student_role_id);
+        return $this->rbac_review->isAssigned($ilias_user_object->getId(), $this->student_role_id);
     }
 
     /*

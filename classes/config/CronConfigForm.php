@@ -5,19 +5,16 @@ namespace EventoImportLite\config;
 use ILIAS\DI\RBACServices;
 use ilSelectInputGUI;
 use ilNumberInputGUI;
-use ilSetting;
 use ilFormSectionHeaderGUI;
 use ilPropertyFormGUI;
-use ilLDAPServer;
 use ilRadioGroupInputGUI;
-use ilTextAreaInputGUI;
 use ilUriInputGUI;
 use ilCheckboxInputGUI;
 use ilTextInputGUI;
 use ilRadioOption;
 use ilAuthUtils;
-use ilObject;
 use EventoImportLite\config\locations\BaseLocationConfiguration;
+use EventoImportLite\config\locations\RepositoryLocationSeeker;
 use EventoImportLite\config\event_auto_create\EventAutoCreateConfiguration;
 
 /**
@@ -49,8 +46,12 @@ class CronConfigForm
     const LANG_DEFAULT_USER_ROLE = 'default_user_role';
     const LANG_DEFAULT_USER_ROLE_DESC = 'default_user_role_desc';
     const LANG_HEADER_USER_ADDITIONAL_ROLE_MAPPING = 'additional_user_roles_mapping';
+    const LANG_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL = 'delete_from_admins_on_removal';
+    const LANG_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_DESC = 'delete_from_admins_on_removal_desc';
     const LANG_ROLE_MAPPING_TO = 'maps_to';
     const LANG_ROLE_MAPPING_TO_DESC = 'maps_to_desc';
+    const LANG_HEADER_USER_FOLLOW_UP_ROLE_MAPPING = 'follow_up_role_mapping';
+    const LANG_HEADER_USER_FOLLOW_UP_ROLE_MAPPING_DESC = 'follow_up_role_mapping_desc';
     const LANG_HEADER_EVENT_LOCATIONS = 'location_settings';
     const LANG_DEPARTMENTS = 'location_departments';
     const LANG_KINDS = 'location_kinds';
@@ -74,13 +75,11 @@ class CronConfigForm
     const FORM_API_TIMEOUT_FAILED_REQUEST = 'crevlite_api_timeout_failed_request';
     const FORM_API_MAX_RETRIES = 'crevlite_api_max_retries';
     const FORM_USER_AUTH_MODE = 'crevlite_user_auth_mode';
-    const FORM_USER_IMPORT_ACC_DURATION = 'crevlite_user_import_acc_duration';
-    const FORM_USER_MAX_ACC_DURATION = 'crevlite_user_max_acc_duration';
-    const FORM_USER_CHANGED_MAIL_SUBJECT = 'crevlite_user_changed_mail_subject';
-    const FORM_USER_CHANGED_MAIL_BODY = 'crevlite_user_changed_mail_body';
     const FORM_DEFAULT_USER_ROLE = 'crevlite_default_user_role';
     const FORM_USER_GLOBAL_ROLE_ = 'crevlite_global_role_';
     const FORM_USER_EVENTO_ROLE_MAPPED_TO_ = 'crevlite_map_from_';
+    const FORM_USER_EVENTO_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_ = 'crevlite_delete_admin_on_removal_from_';
+    const FORM_USER_FOLLOW_UP_ROLE_FOR_ = 'crevlite_follow_up_role_for_';
     const FORM_DEPARTEMTNS = 'crevlite_departments';
     const FORM_KINDS = 'crevlite_kinds';
     const FORM_EVENT_OBJECT_OWNER = 'crevlite_object_owner';
@@ -89,36 +88,35 @@ class CronConfigForm
     const FORM_EVENT_OPT_OWNER_CUSTOM_ID = 'crevlite_object_owner_custom_id';
     const FORM_EVENT_AUTO_CREATE = 'crevlite_event_auto_create';
     const FORM_EVENT_REMOVE_PARTICIPANTS = 'crevlite_remove_participants';
-
-    const CONF_API_URI = 'crevlite_api_uri';
-    const CONF_API_AUTH_KEY = 'crevlite_api_auth_key';
-    const CONF_API_AUTH_SECRET = 'crevlite_api_auth_secret';
-    const CONF_API_PAGE_SIZE = 'crevlite_api_page_size';
-    const CONF_API_MAX_PAGES = 'crevlite_api_max_pages';
-    const CONF_API_TIMEOUT_AFTER_REQUEST = 'crevlite_api_timeout_after_request';
-    const CONF_API_TIMEOUT_FAILED_REQUEST = 'crevlite_api_timeout_failed_request';
-    const CONF_API_MAX_RETRIES = 'crevlite_api_max_retries';
-    const CONF_USER_AUTH_MODE = 'crevlite_ilias_auth_mode';
-    const CONF_USER_IMPORT_ACC_DURATION = 'crevlite_user_import_acc_duration';
-    const CONF_USER_MAX_ACC_DURATION = 'crevlite_user_max_acc_duration';
-    const CONF_USER_CHANGED_MAIL_SUBJECT = 'crevlite_email_account_changed_subject';
-    const CONF_USER_CHANGED_MAIL_BODY = 'crevlite_email_account_changed_body';
-    const CONF_USER_STUDENT_ROLE_ID = 'crevlite_student_role_id';
-    const CONF_DEFAULT_USER_ROLE = 'crevlite_default_user_role';
-    const CONF_ROLES_ILIAS_EVENTO_MAPPING = 'crevlite_roles_ilias_evento_mapping';
-    const CONF_EVENT_OWNER_ID = 'crevlite_object_owner_id';
-    const CONF_EVENT_OBJECT_OWNER = 'crevlite_object_owner';
     const CONF_EVENT_REMOVE_PARTICIPANTS = 'crevlite_remove_participants';
 
-    private \ilSetting $settings;
+    private DefaultUserSettings $default_user_settings;
+    private DefaultEventSettings $default_event_settings;
+    private ImporterApiSettings $importer_api_settings;
+    private BaseLocationConfiguration $event_locations;
+    private RepositoryLocationSeeker $location_seeker;
     private \ilEventoImportLitePlugin $cp;
+    private \ilLanguage $lng;
     private RBACServices $rbac;
 
-    public function __construct(ilSetting $settings, \ilEventoImportLitePlugin $plugin, RBACServices $rbac)
-    {
+    public function __construct(
+        DefaultUserSettings $default_user_settings,
+        DefaultEventSettings $default_event_settings,
+        ImporterApiSettings $importer_api_settings,
+        BaseLocationConfiguration $event_locations,
+        RepositoryLocationSeeker $location_seeker,
+        \ilEventoImportLitePlugin $plugin,
+        \ilLanguage $lng,
+        RBACServices $rbac
+    ) {
         global $DIC;
+        $this->default_user_settings = $default_user_settings;
+        $this->default_event_settings = $default_event_settings;
+        $this->importer_api_settings = $importer_api_settings;
+        $this->event_locations = $event_locations;
+        $this->location_seeker = $location_seeker;
+        $this->lng = $lng;
 
-        $this->settings = $settings;
         $this->cp = $plugin;
         $this->rbac = $rbac;
         $this->lng = $DIC->language();
@@ -139,7 +137,7 @@ class CronConfigForm
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_URI_DESC));
         $ws_item->setRequired(true);
-        $ws_item->setValue($this->settings->get(self::CONF_API_URI, ''));
+        $ws_item->setValue($this->importer_api_settings->getUrl());
         $form->addItem($ws_item);
 
         $ws_item = new ilTextInputGUI(
@@ -148,7 +146,7 @@ class CronConfigForm
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_AUTH_KEY_DESC));
         $ws_item->setRequired(false);
-        $ws_item->setValue($this->settings->get(self::CONF_API_AUTH_KEY, ''));
+        $ws_item->setValue($this->importer_api_settings->getApikey());
         $form->addItem($ws_item);
 
         $ws_item = new ilTextInputGUI(
@@ -157,7 +155,7 @@ class CronConfigForm
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_AUTH_SECRET_DESC));
         $ws_item->setRequired(false);
-        $ws_item->setValue($this->settings->get(self::CONF_API_AUTH_SECRET, ''));
+        $ws_item->setValue($this->importer_api_settings->getApiSecret());
         $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
@@ -167,7 +165,7 @@ class CronConfigForm
         $ws_item->setInfo($this->cp->txt(self::LANG_API_PAGE_SIZE_DESC));
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
-        $ws_item->setValue($this->settings->get(self::CONF_API_PAGE_SIZE, '0'));
+        $ws_item->setValue((string) $this->importer_api_settings->getPageSize());
         $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
@@ -177,7 +175,7 @@ class CronConfigForm
         $ws_item->setInfo($this->cp->txt(self::LANG_API_MAX_PAGES_DESC));
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
-        $ws_item->setValue($this->settings->get(self::CONF_API_MAX_PAGES, '0'));
+        $ws_item->setValue((string) $this->importer_api_settings->getMaxPages());
         $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
@@ -187,7 +185,7 @@ class CronConfigForm
         $ws_item->setInfo($this->cp->txt(self::LANG_API_TIMEOUT_AFTER_REQUEST_DESC));
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
-        $ws_item->setValue($this->settings->get(self::CONF_API_TIMEOUT_AFTER_REQUEST, ''));
+        $ws_item->setValue((string) $this->importer_api_settings->getTimeoutAfterRequest());
         $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
@@ -197,7 +195,7 @@ class CronConfigForm
         $ws_item->setInfo($this->cp->txt(self::LANG_API_TIMEOUT_FAILED_REQUEST_DESC));
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
-        $ws_item->setValue($this->settings->get(self::CONF_API_TIMEOUT_FAILED_REQUEST, ''));
+        $ws_item->setValue((string) $this->importer_api_settings->getTimeoutFailedRequest());
         $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
@@ -207,7 +205,7 @@ class CronConfigForm
         $ws_item->setInfo($this->cp->txt(self::LANG_API_MAX_RETRIES_DESC));
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
-        $ws_item->setValue($this->settings->get(self::CONF_API_MAX_RETRIES, ''));
+        $ws_item->setValue((string) $this->importer_api_settings->getMaxRetries());
         $form->addItem($ws_item);
     }
 
@@ -236,7 +234,7 @@ class CronConfigForm
             $options[$auth_name] = $name;
         }
         $ws_item->setOptions($options);
-        $ws_item->setValue($this->settings->get(self::CONF_USER_AUTH_MODE));
+        $ws_item->setValue($this->default_user_settings->getAuthMode());
         $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
@@ -246,7 +244,7 @@ class CronConfigForm
         $ws_item->setInfo($this->cp->txt(self::LANG_DEFAULT_USER_ROLE_DESC));
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
-        $ws_item->setValue($this->settings->get(self::CONF_DEFAULT_USER_ROLE));
+        $ws_item->setValue((string) $this->default_user_settings->getDefaultUserRoleId());
         $form->addItem($ws_item);
 
         $section = new ilFormSectionHeaderGUI();
@@ -254,14 +252,11 @@ class CronConfigForm
         $form->addItem($section);
 
         $global_roles = $this->rbac->review()->getGlobalRoles();
-        $globale_roles_settings = $this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, null);
-        $role_mapping = !is_null($globale_roles_settings) ? json_decode($globale_roles_settings, true) : null;
-        if (is_null($role_mapping) || !is_array($role_mapping)) {
-            $role_mapping = [];
-        }
+        $role_mapping = array_flip($this->default_user_settings->getEventoCodeToIliasRoleMapping());
+        $delete_from_admin_when_removed_role_array = $this->default_user_settings->getDeleteFromAdminWhenRemovedFromRoleMapping();
 
         foreach ($global_roles as $role_id) {
-            $role_title = ilObject::_lookupTitle($role_id);
+            $role_title = \ilObject::_lookupTitle($role_id);
             $ws_item = new ilCheckboxInputGUI(
                 $role_title,
                 self::FORM_USER_GLOBAL_ROLE_ . "$role_id"
@@ -277,14 +272,54 @@ class CronConfigForm
             $mapping_desc = sprintf($this->cp->txt(self::LANG_ROLE_MAPPING_TO_DESC), $role_title);
             $mapping_input->setInfo($mapping_desc);
 
+            $delete_from_admin_input = new \ilCheckboxInputGUI(
+                $this->cp->txt(self::LANG_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL),
+                self::FORM_USER_EVENTO_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_ . $role_id
+            );
+            $delete_from_admin_input->setInfo($this->cp->txt(self::LANG_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_DESC));
+
             if (isset($role_mapping[$role_id])) {
                 $ws_item->setChecked(true);
                 $mapping_input->setValue((string) $role_mapping[$role_id]);
+                $delete_from_admin_input->setChecked(in_array($role_id, $delete_from_admin_when_removed_role_array));
             } else {
                 $ws_item->setChecked(false);
             }
 
             $ws_item->addSubItem($mapping_input);
+            $ws_item->addSubItem($delete_from_admin_input);
+
+
+
+            $form->addItem($ws_item);
+        }
+
+        $section = new ilFormSectionHeaderGUI();
+        $section->setTitle($this->cp->txt(self::LANG_HEADER_USER_FOLLOW_UP_ROLE_MAPPING));
+        $section->setInfo($this->cp->txt(self::LANG_HEADER_USER_FOLLOW_UP_ROLE_MAPPING_DESC));
+        $form->addItem($section);
+
+        $follow_up_role_mapping = $this->default_user_settings->getFollowUpRoleMapping();
+        foreach (array_keys($role_mapping) as $role_id) {
+            $role_title = \ilObject::_lookupTitle($role_id);
+            $options = [
+                0 => $this->lng->txt('none')
+            ];
+            foreach($global_roles as $global_role_id) {
+                if ($global_role_id === $role_id) {
+                    continue;
+                }
+                $options[$global_role_id] = \ilObject::_lookupTitle($global_role_id);
+            }
+            $ws_item = new \ilSelectInputGUI(
+                $role_title,
+                self::FORM_USER_FOLLOW_UP_ROLE_FOR_ . "$role_id"
+            );
+            $ws_item->setOptions($options);
+            $ws_item->setValue(0);
+            if (array_key_exists($role_id, $follow_up_role_mapping)) {
+                $ws_item->setValue($follow_up_role_mapping[$role_id]);
+            }
             $form->addItem($ws_item);
         }
     }
@@ -298,16 +333,14 @@ class CronConfigForm
         $header->setTitle($this->cp->txt(self::LANG_HEADER_EVENT_LOCATIONS));
         $form->addItem($header);
 
-        $locations = new BaseLocationConfiguration($this->settings);
-
         $departments = new ilTextInputGUI($this->cp->txt(self::LANG_DEPARTMENTS), self::FORM_DEPARTEMTNS);
         $departments->setMulti(true, false, true);
-        $departments->setValue($locations->getDepartmentLocationList());
+        $departments->setValue($this->event_locations->getDepartmentLocationList());
         $form->addItem($departments);
 
         $kinds = new ilTextInputGUI($this->cp->txt(self::LANG_KINDS), self::FORM_KINDS);
         $kinds->setMulti(true, false, true);
-        $kinds->setValue($locations->getKindLocationList());
+        $kinds->setValue($this->event_locations->getKindLocationList());
         $form->addItem($kinds);
     }
 
@@ -326,7 +359,7 @@ class CronConfigForm
             self::FORM_EVENT_REMOVE_PARTICIPANTS
         );
         $remove_participants->setInfo($this->cp->txt(self::LANG_EVENT_REMOVE_PARTICIPANTS_DESC));
-        $remove_participants->setChecked($this->settings->get(self::CONF_EVENT_REMOVE_PARTICIPANTS, '1') == true);
+        $remove_participants->setChecked($this->default_event_settings->get(self::CONF_EVENT_REMOVE_PARTICIPANTS, '1') == true);
         $form->addItem($remove_participants);
 
         $radio = new ilRadioGroupInputGUI(
@@ -350,11 +383,13 @@ class CronConfigForm
             self::FORM_EVENT_OPT_OWNER_CUSTOM_ID// 'crevlite_object_owner_id'
         );
         $custom_user_id->allowDecimals(false);
-        $custom_user_id->setValue($this->settings->get(self::CONF_EVENT_OWNER_ID, ''));
+        $custom_user_id->setValue((string) $this->default_event_settings->getDefaultObjectOwnerId());
         $option->addSubItem($custom_user_id);
 
         $radio->addOption($option);
-        $radio->setValue($this->settings->get(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_ROOT));
+        $radio_value = $this->default_event_settings->getDefaultObjectOwnerId() === SYSTEM_USER_ID ?
+            self::FORM_EVENT_OPT_OWNER_ROOT : self::FORM_EVENT_OPT_OWNER_CUSTOM_USER;
+        $radio->setValue($radio_value);
 
         $form->addItem($radio);
 
@@ -369,104 +404,85 @@ class CronConfigForm
 
     public function saveApiConfigFromForm(ilPropertyFormGUI $form) : bool
     {
-        $form_input_correct = true;
-
-        $this->getTextInputAndSaveIfNotNull($form, self::FORM_API_URI, self::CONF_API_URI);
-        $this->getTextInputAndSaveIfNotNull($form, self::FORM_API_AUTH_KEY, self::CONF_API_AUTH_KEY);
-        $this->getTextInputAndSaveIfNotNull($form, self::FORM_API_AUTH_SECRET, self::CONF_API_AUTH_SECRET);
-        $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_API_PAGE_SIZE, self::CONF_API_PAGE_SIZE);
-        $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_API_MAX_PAGES, self::CONF_API_MAX_PAGES);
-        $this->getIntegerInputAndSaveIfNotNull(
-            $form,
-            self::FORM_API_TIMEOUT_AFTER_REQUEST,
-            self::CONF_API_TIMEOUT_AFTER_REQUEST
+        $this->importer_api_settings->setUrl($form->getInput(self::FORM_API_URI));
+        $this->importer_api_settings->setApiKey($form->getInput(self::FORM_API_AUTH_KEY));
+        $this->importer_api_settings->setApiSecret($form->getInput(self::FORM_API_AUTH_SECRET));
+        $this->importer_api_settings->setPageSize(
+            intval($form->getInput(self::FORM_API_PAGE_SIZE))
         );
-        $this->getIntegerInputAndSaveIfNotNull(
-            $form,
-            self::FORM_API_TIMEOUT_FAILED_REQUEST,
-            self::CONF_API_TIMEOUT_FAILED_REQUEST
+        $this->importer_api_settings->setMaxPages(
+            intval($form->getInput(self::FORM_API_MAX_PAGES))
         );
-        $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_API_MAX_RETRIES, self::CONF_API_MAX_RETRIES);
+        $this->importer_api_settings->setTimeoutAfterRequest(
+            intval($form->getInput(self::FORM_API_TIMEOUT_AFTER_REQUEST))
+        );
+        $this->importer_api_settings->setTimeoutFailedRequest(
+            intval($form->getInput(self::FORM_API_TIMEOUT_FAILED_REQUEST))
+        );
+        $this->importer_api_settings->setMaxRetries(
+            intval($form->getInput(self::FORM_API_MAX_RETRIES))
+        );
+        $this->importer_api_settings->saveCurrentConfigurationToSettings();
 
-        return $form_input_correct;
+        return true;
     }
 
     public function saveUserConfigFromForm(ilPropertyFormGUI $form) : bool
     {
-        $form_input_correct = true;
-
-        if ($form->getInput(self::FORM_USER_AUTH_MODE) != null) {
-            $this->settings->set(self::CONF_USER_AUTH_MODE, $form->getInput(self::FORM_USER_AUTH_MODE));
-        }
-
-        $this->getIntegerInputAndSaveIfNotNull(
-            $form,
-            self::FORM_USER_IMPORT_ACC_DURATION,
-            self::CONF_USER_IMPORT_ACC_DURATION
-        );
-        $this->getIntegerInputAndSaveIfNotNull(
-            $form,
-            self::FORM_USER_MAX_ACC_DURATION,
-            self::CONF_USER_MAX_ACC_DURATION
-        );
-        $this->getTextInputAndSaveIfNotNull(
-            $form,
-            self::FORM_USER_CHANGED_MAIL_SUBJECT,
-            self::CONF_USER_CHANGED_MAIL_SUBJECT
-        );
-        $this->getTextInputAndSaveIfNotNull(
-            $form,
-            self::FORM_USER_CHANGED_MAIL_BODY,
-            self::CONF_USER_CHANGED_MAIL_BODY
+        $this->default_user_settings->setAuthMode($form->getInput(self::FORM_USER_AUTH_MODE));
+        $this->default_user_settings->setDefaultUserRoleId(
+            intval($form->getInput(self::FORM_DEFAULT_USER_ROLE))
         );
 
-        $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_DEFAULT_USER_ROLE, self::CONF_DEFAULT_USER_ROLE);
+        $this->default_user_settings->saveCurrentConfigurationToSettings();
 
         $global_roles = $this->rbac->review()->getGlobalRoles();
         $role_mapping = [];
-        $save_global_role_mapping = true;
+        $delete_admin_on_removal_from_role = [];
+        $follow_up_role_mapping = [];
 
         foreach ($global_roles as $role_id) {
             $check_box = $form->getInput(self::FORM_USER_GLOBAL_ROLE_ . $role_id);
-            if ($check_box == '1') {
-                $mapped_role_input = (int) $form->getInput(self::FORM_USER_EVENTO_ROLE_MAPPED_TO_ . $role_id);
-                if (!is_null($mapped_role_input) && !in_array($mapped_role_input, $role_mapping)) {
-                    $role_mapping[$role_id] = $mapped_role_input;
-                    continue;
-                }
+            if ($check_box !== '1') {
+                continue;
+            }
 
-                if (in_array($mapped_role_input, $role_mapping)) {
-                    $form_input_correct = false;
-                    $save_global_role_mapping = false;
-                }
+            $mapped_role_input = $form->getInput(self::FORM_USER_EVENTO_ROLE_MAPPED_TO_ . $role_id);
+            $delete_from_admin_on_removal = $form->getInput(self::FORM_USER_EVENTO_ROLE_DELETE_FROM_ADMIN_ON_REMOVAL_ . $role_id);
+
+            if (in_array($mapped_role_input, $role_mapping)) {
+                return false;
+            }
+
+            $role_mapping[$mapped_role_input] = $role_id;
+
+            $follow_up_role_mapping[$role_id] = intval($form->getInput(self::FORM_USER_FOLLOW_UP_ROLE_FOR_ . $role_id) ?? '0');
+
+            if ($delete_from_admin_on_removal === '1') {
+                $delete_admin_on_removal_from_role[] = $role_id;
             }
         }
-        if ($save_global_role_mapping) {
-            $this->settings->set(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, json_encode($role_mapping));
-        }
 
-        return $form_input_correct;
+        $this->default_user_settings->setEventoCodeToIliasRoleMapping($role_mapping);
+        $this->default_user_settings->setDeleteFromAdminWhenRemovedFromRoleMapping($delete_admin_on_removal_from_role);
+        $this->default_user_settings->setFollowUpRoleMapping($follow_up_role_mapping);
+        $this->default_user_settings->saveCurrentConfigurationToSettings();
+
+        return true;
     }
 
     public function saveEventLocationConfigFromForm(ilPropertyFormGUI $form) : bool
     {
-        $form_input_correct = true;
 
-        $location_settings = new BaseLocationConfiguration($this->settings);
-
-        $location_settings->setDepartmentLocationList($form->getInput(self::FORM_DEPARTEMTNS));
-        $location_settings->setKindLocationList($form->getInput(self::FORM_KINDS));
-
-        $location_settings->saveCurrentConfigurationToSettings();
-
-        return $form_input_correct;
+        $this->event_locations->setDepartmentLocationList($form->getInput(self::FORM_DEPARTEMTNS));
+        $this->event_locations->setKindLocationList($form->getInput(self::FORM_KINDS));
+        $this->event_locations->saveCurrentConfigurationToSettings();
+        return true;
     }
 
     public function saveEventConfigFromForm(ilPropertyFormGUI $form) : bool
     {
-        $form_input_correct = true;
-
-        $this->settings->set(self::CONF_EVENT_REMOVE_PARTICIPANTS, $form->getInput(self::FORM_EVENT_REMOVE_PARTICIPANTS));
+        $this->default_event_settings->set(self::CONF_EVENT_REMOVE_PARTICIPANTS, $form->getInput(self::FORM_EVENT_REMOVE_PARTICIPANTS));
 
         $event_auto_create = new EventAutoCreateConfiguration($this->settings);
         $event_auto_create->setAndSaveConfiguredEvents($form->getInput(self::FORM_EVENT_AUTO_CREATE));
@@ -474,33 +490,17 @@ class CronConfigForm
         $input_object_owner = $form->getInput(self::FORM_EVENT_OBJECT_OWNER);
         switch ($input_object_owner) {
             case self::FORM_EVENT_OPT_OWNER_ROOT:
-                $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_ROOT);
-                $this->settings->set(self::CONF_EVENT_OWNER_ID, "6");
+                $this->default_event_settings->setDefaultObjectOwnerId(6);
                 break;
 
             case self::FORM_EVENT_OPT_OWNER_CUSTOM_USER:
-                $input_user_id = (int) $form->getInput(self::FORM_EVENT_OPT_OWNER_CUSTOM_ID);
-                $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_CUSTOM_USER);
-                $this->settings->set(self::CONF_EVENT_OWNER_ID, "$input_user_id");
+                $this->default_event_settings->setDefaultObjectOwnerId(
+                    intval($form->getInput(self::FORM_EVENT_OPT_OWNER_CUSTOM_ID))
+                );
                 break;
         }
 
-        return $form_input_correct;
-    }
-
-    private function getTextInputAndSaveIfNotNull(ilPropertyFormGUI $form, string $input_field, string $conf_key)
-    {
-        $value = $form->getInput($input_field);
-        if (!is_null($value)) {
-            $this->settings->set($conf_key, $value);
-        }
-    }
-
-    private function getIntegerInputAndSaveIfNotNull(ilPropertyFormGUI $form, string $input_field, string $conf_key)
-    {
-        $value = (int) $form->getInput($input_field);
-        if (!is_null($value)) {
-            $this->settings->set($conf_key, "$value");
-        }
+        $this->default_event_settings->saveCurrentConfigurationToSettings();
+        return true;
     }
 }

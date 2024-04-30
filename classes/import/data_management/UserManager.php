@@ -28,9 +28,10 @@ class UserManager
 
     public function createAndSetupNewIliasUser(EventoUser $evento_user) : \ilObjUser
     {
-        $ilias_user_object = $this->ilias_user_service->createNewIliasUserObject();
-
-        $ilias_user_object = $this->setUserValuesFromEventoUserObject($ilias_user_object, $evento_user);
+        $ilias_user_object = $this->setUserValuesFromEventoUserObject(
+            $this->ilias_user_service->createNewIliasUserObject(),
+            $evento_user
+        );
 
         $ilias_user_object->create();
         $ilias_user_object->saveAsNew(false);
@@ -38,7 +39,11 @@ class UserManager
         $this->setUserDefaultSettings($ilias_user_object, $this->default_user_settings);
         $this->setForcedUserSettings($ilias_user_object, $this->default_user_settings);
 
-        $this->evento_user_repo->addNewEventoIliasUserByEventoUser($evento_user, $ilias_user_object, IliasEventoUserRepository::TYPE_HSLU_AD);
+        $this->evento_user_repo->addNewEventoIliasUser(
+            $evento_user->getEventoId(),
+            $ilias_user_object->getId(),
+            IliasEventoUserRepository::TYPE_HSLU_AD
+        );
 
         return $ilias_user_object;
     }
@@ -76,10 +81,48 @@ class UserManager
 
         // Set ilias roles according to given evento roles
         foreach ($this->default_user_settings->getEventoCodeToIliasRoleMapping() as $evento_role_code => $ilias_role_id) {
+            if ($this->ilias_user_service->isUserAssignedToRole($user->getId(), $ilias_role_id)
+                && in_array($evento_role_code, $imported_evento_roles)) {
+                continue;
+            }
+
             if (in_array($evento_role_code, $imported_evento_roles)) {
                 $this->ilias_user_service->assignUserToRole($user->getId(), $ilias_role_id);
-            } else {
-                $this->ilias_user_service->deassignUserFromRole($user->getId(), $ilias_role_id);
+                continue;
+            }
+
+            $this->removeUserAccessAfterRemovalOfEventoRole($user, $ilias_role_id);
+        }
+    }
+
+    public function removeUserAccessesAfterLeavingInstitution(\ilObjUser $user): void
+    {
+        $this->ilias_user_service->deassignUserFromRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
+
+        $assigned_global_roles = $this->ilias_user_service->getGlobalRolesOfUser($user->getId());
+        $roles_mapped_to_evento = $this->default_user_settings->getEventoCodeToIliasRoleMapping();
+        foreach ($assigned_global_roles as $global_role_id) {
+            if (!in_array($global_role_id, $roles_mapped_to_evento)) {
+                continue;
+            }
+            $this->removeUserAccessAfterRemovalOfEventoRole($user, $global_role_id);
+        }
+    }
+
+    private function removeUserAccessAfterRemovalOfEventoRole(\ilObjUser $user, int $role_id): void
+    {
+        $follow_up_roles_mapping = $this->default_user_settings->getFollowUpRoleMapping();
+        $roles_needing_admin_removal = $this->default_user_settings->getDeleteFromAdminWhenRemovedFromRoleMapping();
+
+        $this->ilias_user_service->deassignUserFromRole($user->getId(), $role_id);
+        if (array_key_exists($role_id, $follow_up_roles_mapping)) {
+            $this->ilias_user_service->assignUserToRole($user->getId(), $follow_up_roles_mapping[$role_id]);
+        }
+
+        if (in_array($role_id, $roles_needing_admin_removal)) {
+            $admin_roles = $this->ilias_user_service->getCrsAdminButNotOwnerRolesOfUser();
+            foreach ($admin_roles as $admin_role_id) {
+                $this->ilias_user_service->deassignUserFromRole($user->getId(), $admin_role_id);
             }
         }
     }
@@ -111,7 +154,7 @@ class UserManager
         }
 
         $received_gender_char = $this->convertEventoToIliasGenderChar($evento_user->getGender());
-        if ($ilias_user->getGender() != $received_gender_char) {
+        if ($ilias_user->getGender() !== $received_gender_char) {
             $changed_user_data['gender'] = [
                 'old' => $ilias_user->getGender(),
                 'new' => $received_gender_char
@@ -120,7 +163,7 @@ class UserManager
         }
 
         $mail_list = $evento_user->getEmailList();
-        if (isset($mail_list[0]) && ($ilias_user->getSecondEmail() != $mail_list[0])) {
+        if (isset($mail_list[0]) && ($ilias_user->getSecondEmail() !== $mail_list[0])) {
             $changed_user_data['second_mail'] = [
                 'old' => $ilias_user->getSecondEmail(),
                 'new' => $mail_list[0]
@@ -128,7 +171,7 @@ class UserManager
             $ilias_user->setSecondEmail($mail_list[0]);
         }
 
-        if ($ilias_user->getMatriculation() != ('Evento:' . $evento_user->getEventoId())) {
+        if ($ilias_user->getMatriculation() !== ('Evento:' . $evento_user->getEventoId())) {
             $changed_user_data['matriculation'] = [
                 'old' => $ilias_user->getMatriculation(),
                 'new' => 'Evento:' . $evento_user->getEventoId()
@@ -136,7 +179,7 @@ class UserManager
             $ilias_user->setMatriculation('Evento:' . $evento_user->getEventoId());
         }
 
-        if ($ilias_user->getAuthMode() != $this->default_user_settings->getAuthMode()) {
+        if ($ilias_user->getAuthMode() !== $this->default_user_settings->getAuthMode()) {
             $changed_user_data['auth_mode'] = [
                 'old' => $ilias_user->getAuthMode(),
                 'new' => $this->default_user_settings->getAuthMode()
@@ -152,7 +195,7 @@ class UserManager
             $ilias_user->setActive(true);
         }
 
-        if (count($changed_user_data) > 0) {
+        if ($changed_user_data !== []) {
             $ilias_user->update();
         }
 
@@ -254,10 +297,13 @@ class UserManager
     {
         $ilias_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
         if (is_null($ilias_user_id)) {
-            $edu_user = $this->ilias_user_service->searchEduUserByEmail($evento_user->getEmailAddress());
-            if (!is_null($edu_user)) {
-                $ilias_user_id = (int) $edu_user->getId();
-                $this->evento_user_repo->addNewEventoIliasUserByEventoUserShort($evento_user, $edu_user, IliasEventoUserRepository::TYPE_EDU_ID);
+            $ilias_user_id = $this->ilias_user_service->getUserIdByExternalAccount($evento_user->getEduId());
+            if ($ilias_user_id !== 0) {
+                $this->evento_user_repo->addNewEventoIliasUser(
+                    $evento_user->getEventoId(),
+                    $ilias_user_id,
+                    IliasEventoUserRepository::TYPE_EDU_ID
+                );
             }
         }
 

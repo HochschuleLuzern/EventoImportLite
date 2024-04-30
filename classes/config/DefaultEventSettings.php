@@ -4,6 +4,10 @@ namespace EventoImportLite\config;
 
 class DefaultEventSettings
 {
+    private const CONF_EVENT_OWNER_ID = 'crevlite_object_owner_id';
+
+    private \ilSetting $settings;
+
     private int $default_object_owner_id;
     private int $default_sort_mode;
     private int $default_sort_direction;
@@ -14,13 +18,20 @@ class DefaultEventSettings
 
     public function __construct(\ilSetting $settings)
     {
-        $this->default_object_owner_id = (int) $settings->get(CronConfigForm::CONF_EVENT_OWNER_ID, "6");
+        $this->settings = $settings;
+
+        $this->default_object_owner_id = (int) $this->settings->get(self::CONF_EVENT_OWNER_ID, "6");
         $this->default_sort_mode = \ilContainer::SORT_MANUAL;
         $this->default_sort_new_items_order = \ilContainer::SORT_NEW_ITEMS_ORDER_CREATION;
         $this->default_sort_new_items_position = \ilContainer::SORT_NEW_ITEMS_POSITION_BOTTOM;
         $this->default_sort_direction = \ilContainer::SORT_DIRECTION_ASC;
         $this->default_online_status = true;
         $this->remove_participants_on_membership_sync = $settings->get(CronConfigForm::CONF_EVENT_REMOVE_PARTICIPANTS, '1') == 1;
+    }
+
+    public function setDefaultObjectOwnerId(int $default_object_owner_id): void
+    {
+        $this->default_object_owner_id = $default_object_owner_id;
     }
 
     public function getDefaultObjectOwnerId() : int
@@ -33,12 +44,12 @@ class DefaultEventSettings
         return $this->default_sort_mode;
     }
 
-    public function getDefaultSortNewItemsOrder()
+    public function getDefaultSortNewItemsOrder(): int
     {
         return $this->default_sort_new_items_order;
     }
 
-    public function getDefaultSortNewItemsPosition()
+    public function getDefaultSortNewItemsPosition(): int
     {
         return $this->default_sort_new_items_position;
     }
@@ -56,5 +67,10 @@ class DefaultEventSettings
     public function getRemoveParticipantsOnMembershipSync() : bool
     {
         return $this->remove_participants_on_membership_sync;
+    }
+
+    public function saveCurrentConfigurationToSettings(): void
+    {
+        $this->settings->set(self::CONF_EVENT_OWNER_ID, (string) $this->getDefaultObjectOwnerId());
     }
 }

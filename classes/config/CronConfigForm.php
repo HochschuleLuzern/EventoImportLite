@@ -229,7 +229,7 @@ class CronConfigForm
             if ($auth_name == 'default') {
                 $name = $this->lng->txt('auth_' . $auth_name) . " (" . $this->lng->txt('auth_' . \ilAuthUtils::_getAuthModeName($auth_key)) . ")";
             } else {
-                $name = \ilAuthUtils::getAuthModeTranslation($auth_key, $auth_name);
+                $name = \ilAuthUtils::getAuthModeTranslation((string)$auth_key, $auth_name);
             }
             $options[$auth_name] = $name;
         }

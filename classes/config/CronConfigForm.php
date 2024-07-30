@@ -492,7 +492,7 @@ class CronConfigForm
 
     public function saveEventConfigFromForm(ilPropertyFormGUI $form) : bool
     {
-        $this->default_event_settings->setRemoveParticipantsOnMembershipSync($form->getInput(self::FORM_EVENT_REMOVE_PARTICIPANTS));
+        $this->default_event_settings->setRemoveParticipantsOnMembershipSync((bool)$form->getInput(self::FORM_EVENT_REMOVE_PARTICIPANTS));
 
         $event_auto_create = new EventAutoCreateConfiguration($this->default_event_settings->getSettings());
         $event_auto_create->setAndSaveConfiguredEvents($form->getInput(self::FORM_EVENT_AUTO_CREATE));

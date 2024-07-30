@@ -3,7 +3,7 @@
 namespace EventoImportLite\administration;
 
 use EventoImportLite\config\locations\EventLocationsRepository;
-use EventoImport\config\locations\BaseLocationConfiguration;
+use EventoImportLite\config\locations\BaseLocationConfiguration;
 use ILIAS\DI\UIServices;
 
 class EventLocationsAdminGUI

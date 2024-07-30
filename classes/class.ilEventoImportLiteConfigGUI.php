@@ -7,13 +7,13 @@ use ILIAS\DI\UIServices;
 use EventoImportLite\administration\EventoImportLiteApiTester;
 use EventoImportLite\administration\AdminScriptPageGUI;
 use EventoImportLite\config\locations\EventLocationsRepository;
-use EventoImport\config\locations\BaseLocationConfiguration;
+use EventoImportLite\config\locations\BaseLocationConfiguration;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class ilEventoImportLiteConfigGUI
- *
  * This class currently does not contain any configuration in it
+ *   * @ilCtrl_isCalledBy    ilEventoImportLiteConfigGUI: ilObjComponentSettingsGUI
  */
 class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
 {

@@ -69,6 +69,16 @@ class DefaultEventSettings
         return $this->remove_participants_on_membership_sync;
     }
 
+    public function setRemoveParticipantsOnMembershipSync(bool $remove_participants_on_membership_sync) : void
+    {
+        $this->remove_participants_on_membership_sync = $remove_participants_on_membership_sync;
+    }
+
+    public function getSettings() : \ilSetting
+    {
+        return $this->settings;
+    }
+
     public function saveCurrentConfigurationToSettings(): void
     {
         $this->settings->set(self::CONF_EVENT_OWNER_ID, (string) $this->getDefaultObjectOwnerId());

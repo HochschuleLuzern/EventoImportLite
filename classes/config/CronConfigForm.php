@@ -369,7 +369,7 @@ class CronConfigForm
             self::FORM_EVENT_REMOVE_PARTICIPANTS
         );
         $remove_participants->setInfo($this->cp->txt(self::LANG_EVENT_REMOVE_PARTICIPANTS_DESC));
-        $remove_participants->setChecked($this->default_event_settings->get(self::CONF_EVENT_REMOVE_PARTICIPANTS, '1') == true);
+        $remove_participants->setChecked($this->default_event_settings->getRemoveParticipantsOnMembershipSync() == true);
         $form->addItem($remove_participants);
 
         $radio = new ilRadioGroupInputGUI(
@@ -403,7 +403,7 @@ class CronConfigForm
 
         $form->addItem($radio);
 
-        $auto_create_config = new EventAutoCreateConfiguration($this->settings);
+        $auto_create_config = new EventAutoCreateConfiguration($this->default_event_settings->getSettings());
 
         $event_auto_create_input = new ilTextInputGUI($this->cp->txt(self::LANG_EVENT_AUTO_CREATE), self::FORM_EVENT_AUTO_CREATE);
         $event_auto_create_input->setInfo($this->cp->txt(self::LANG_EVENT_AUTO_CREATE_DESC));
@@ -492,9 +492,9 @@ class CronConfigForm
 
     public function saveEventConfigFromForm(ilPropertyFormGUI $form) : bool
     {
-        $this->default_event_settings->set(self::CONF_EVENT_REMOVE_PARTICIPANTS, $form->getInput(self::FORM_EVENT_REMOVE_PARTICIPANTS));
+        $this->default_event_settings->setRemoveParticipantsOnMembershipSync($form->getInput(self::FORM_EVENT_REMOVE_PARTICIPANTS));
 
-        $event_auto_create = new EventAutoCreateConfiguration($this->settings);
+        $event_auto_create = new EventAutoCreateConfiguration($this->default_event_settings->getSettings());
         $event_auto_create->setAndSaveConfiguredEvents($form->getInput(self::FORM_EVENT_AUTO_CREATE));
 
         $input_object_owner = $form->getInput(self::FORM_EVENT_OBJECT_OWNER);

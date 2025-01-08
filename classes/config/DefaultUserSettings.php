@@ -4,7 +4,7 @@ namespace EventoImportLite\config;
 
 class DefaultUserSettings
 {
-    private const DEFAULT_USER_ROLE = 109;
+    private const DEFAULT_USER_ROLE = 4;
     private const DEFAULT_GUEST_ROLE = 5;
     private const DEFAULT_HITS_PER_PAGE = 100;
     private const DEFAULT_SHOW_USERS_ONLINE = 'associated';

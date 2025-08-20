@@ -109,10 +109,10 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
                     $output = $api_tester_gui->getApiDataAsString($cmd);
 
                     if ($output !== '') {
-                        ilUtil::sendSuccess($output, true);
+                        \ilEventoImportLitePlugin::sendSuccess($output, true);
                     }
                 } catch (Exception $e) {
-                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
+                    \ilEventoImportLitePlugin::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
                 }
 
                 $this->ctrl->redirect($this, 'configure');
@@ -125,7 +125,7 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
                 $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);
                 $diff = $locations_builder->rebuildRepositoryLocationsTable($locations_settings);
 
-                \ilUtil::sendSuccess("Event Locats reloaded successfully. Added $diff new locations", true);
+                \ilEventoImportLitePlugin::sendSuccess("Event Locats reloaded successfully. Added $diff new locations", true);
                 $this->ctrl->redirect($this, 'configure');
                 break;
 
@@ -181,7 +181,7 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
 
                 $locations_builder->rebuildRepositoryLocationsTable($locations_settings);
 
-                \ilUtil::sendSuccess($this->ui_services->renderer()->render($ui_comps), true);
+                \ilEventoImportLitePlugin::sendSuccess($this->ui_services->renderer()->render($ui_comps), true);
                 $this->ctrl->redirect($this, 'configure');
 
                 break;
@@ -198,17 +198,17 @@ class ilEventoImportLiteConfigGUI extends ilPluginConfigGUI
                     $success = $event_auto_create_gui->saveListForAutoCreatedEvents();
 
                     if ($success) {
-                        ilUtil::sendSuccess("Events saved", true);
+                        \ilEventoImportLitePlugin::sendSuccess("Events saved", true);
                     }
                 } catch (Exception $e) {
-                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
+                    \ilEventoImportLitePlugin::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
                 }
 
                 $this->ctrl->redirect($this, 'configure');
                 break;
 
             default:
-                ilUtil::sendFailure('Command not found', true);
+                \ilEventoImportLitePlugin::sendFailure('Command not found', true);
                 $this->ctrl->redirect($this, 'configure');
                 break;
         }

@@ -58,11 +58,11 @@ class EventoImportLiteApiTesterGUI
             $data = $model ? htmlspecialchars(print_r($model->getDecodedApiData(), true)) : 'No object received from API';
             return $this->buildMessageForNextPage("CMD = $cmd", $data);
         } catch (\ilEventoImportLiteApiDataException $e) {
-            \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
+            \ilEventoImportLitePlugin::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
         } catch (\ilEventoImportLiteCommunicationException $e) {
-            \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
+            \ilEventoImportLitePlugin::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
         } catch (\Exception $e) {
-            \ilUtil::sendFailure("Error occured for paramerers: ", true);
+            \ilEventoImportLitePlugin::sendFailure("Error occured for paramerers: ", true);
         }
 
         return '';
@@ -79,11 +79,11 @@ class EventoImportLiteApiTesterGUI
 
             return $this->buildMessageForNextPage("CMD = $cmd, Skip = $skip, Take = $take", $ret);
         } catch (\ilEventoImportLiteApiDataException $e) {
-            \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
+            \ilEventoImportLitePlugin::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
         } catch (\ilEventoImportLiteCommunicationException $e) {
-            \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
+            \ilEventoImportLitePlugin::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
         } catch (\Exception $e) {
-            \ilUtil::sendFailure("Error occured for paramerers CMD = $cmd, Skip = $skip, Take = $take", true);
+            \ilEventoImportLitePlugin::sendFailure("Error occured for paramerers CMD = $cmd, Skip = $skip, Take = $take", true);
         }
 
         return '';
@@ -101,11 +101,11 @@ class EventoImportLiteApiTesterGUI
 
             return $this->buildMessageForNextPage("CMD = $cmd", $data);
         } catch (\ilEventoImportLiteApiDataException $e) {
-            \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
+            \ilEventoImportLitePlugin::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
         } catch (\ilEventoImportLiteCommunicationException $e) {
-            \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
+            \ilEventoImportLitePlugin::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
         } catch (\Exception $e) {
-            \ilUtil::sendFailure("Error occured for paramerers CMD = $cmd", true);
+            \ilEventoImportLitePlugin::sendFailure("Error occured for paramerers CMD = $cmd", true);
         }
 
         return '';

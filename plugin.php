@@ -23,10 +23,6 @@
     $id = 'crevlite';
 
     // Version Information of Plugin & compatible versions of ILIAS
-    $version = '2.0.1';
-    $ilias_min_version = '8.0';
-    $ilias_max_version = '9.999';
-
-    // Please contact this person if you have questions
-    $responsible = 'Raphael Heer';
-    $responsible_mail = 'raphael.heer@hslu.ch';
+    $version = '2.0.2';
+    $ilias_min_version = '10.0';
+    $ilias_max_version = '10.999';
